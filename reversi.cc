@@ -3,7 +3,6 @@
 #include <algorithm>
 
 #include "reversi.h"
-#include "search.h"
 
 const pos_type board::chessman_num;
 const pos_type board::size;

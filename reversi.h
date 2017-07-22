@@ -62,6 +62,8 @@ class board{
 	friend struct hash<board>;
 public:
 
+	brd_type brd_black,brd_white;
+
 	/** @fn board()
 	* @brief The default constructor of class board
 		This function do nothing at all.
@@ -671,8 +673,6 @@ public:
 
 protected:
 
-	brd_type brd_black,brd_white;
-
 	static void config_flip();
 	static void config_search();
 
@@ -686,12 +686,11 @@ protected:
 template <>
 struct std::hash<board> : public unary_function<board, size_t>{
 	size_t operator()(const board& brd) const{
-		return (
-			size_t(brd.brd_black)
-			+ size_t(brd.brd_black >> 32) * 1867970917
-			+ size_t(brd.brd_white) * 1009562269
-			+ size_t(brd.brd_white >> 32) * 739351663
+		brd_type temp = (
+			brd.brd_black * 3727042349078977
+			+ brd.brd_white * 9109418502615479
 		);
+		return size_t(temp + (temp >> 32));
 	}
 };
 

@@ -5,7 +5,7 @@
 #include "pattern.h"
 
 calc_type table_val[board::size2][board::size2];
-trans_type table_trans[2];
+tank table_trans[2];
 
 const calc_type table_val_init[board::size2] = {
 	0.0010,0.0003,0.0007,0.0008,0.0008,0.0007,0.0003,0.0010,
@@ -22,8 +22,6 @@ void board::config_search(){}
 
 void board::clear_search_info(){
 	node_count = 0;
-	table_trans[0].clear();
-	table_trans[1].clear();
 }
 
 #ifdef __GNUC__
@@ -223,17 +221,20 @@ calc_type board::search(cbool color,cshort height,calc_type alpha,calc_type beta
 	};
 	typedef const brd_val& cbrd_val;
 
-	#define trans_save(data) \
+	#define trans_save(val) \
 		if(mthd & mthd_trans){ \
-			auto& trans_interval = trans_ptr->second; \
-			if(data < beta_save){ \
-				trans_interval.second = data; \
+			if(val < beta_save){ \
+				slt->beta = val; \
 			} \
-			if(data > alpha_save){ \
-				trans_interval.first = data; \
+			if(val > alpha_save){ \
+				slt->alpha = val; \
 			} \
 		}
 
+	#define trans_save_pos \
+		if(mthd & mthd_trans){ \
+			slt->pos = p->pos; \
+		}
 
 	#ifdef USE_ASM
 		#define trail_zero_count(brd,result) \
@@ -279,42 +280,38 @@ calc_type board::search(cbool color,cshort height,calc_type alpha,calc_type beta
 
 		++node_count;
 
-		calc_type alpha_save,beta_save;
-		trans_type::iterator trans_ptr;
-
-		if(mthd & mthd_trans){
-			trans_ptr = table_trans[color].find(*this);
-			if(trans_ptr != table_trans[color].end()){
-				auto& trans_interval = trans_ptr->second;
-				if(trans_interval.first >= beta){
-					return trans_interval.first;
-					//return beta;
-				}
-				if(trans_interval.second <= alpha){
-					return trans_interval.second;
-					//return alpha;
-				}
-				if(trans_interval.first > alpha){
-					alpha = trans_interval.first;
-				}
-				if(trans_interval.second < beta){
-					beta = trans_interval.second;
-				}
-				assert(alpha <= beta);
-			}else{
-				trans_ptr = table_trans[color].insert(
-					std::make_pair(*this,interval(_inf,inf))
-				).first;
-			}
-			alpha_save = alpha;
-			beta_save = beta;
-		}
-
 		if(height == 0){
 			if(mthd & mthd_ptn)
 				return this->score_ptn(color);
 			else
 				return this->score(color);
+		}
+
+		slot* slt;
+		calc_type alpha_save, beta_save;
+
+		if(mthd & mthd_trans){
+			slt = &table_trans[color].find(*this);
+			if(slt->brd == *this && slt->height == height){
+				if(slt->alpha >= beta){
+					return slt->alpha;
+					//return beta;
+				}
+				if(slt->beta <= alpha){
+					return slt->beta;
+					//return alpha;
+				}
+				if(slt->alpha > alpha){
+					alpha = slt->alpha;
+				}
+				if(slt->beta < beta){
+					beta = slt->beta;
+				}
+			}else{
+				*slt = {*this,_inf,inf,height,0};
+			}
+			alpha_save = alpha;
+			beta_save = beta;
 		}
 
 		brd_val vec[32];
@@ -347,7 +344,18 @@ calc_type board::search(cbool color,cshort height,calc_type alpha,calc_type beta
 				);
 			}
 
-			for(brd_val* p = ptr;p != vec;){
+			brd_val* p;
+
+			if(mthd & mthd_trans){
+				p = find_if(vec,ptr,[&slt](cbrd_val b){return b.pos == slt->pos;});
+				if(p != ptr){
+					iter_swap(p,ptr - 1);
+					p = ptr - 1;
+					goto label_first;
+				}
+			}
+
+			for(p = ptr;p != vec;){
 
 				if(mthd & mthd_kill){
 					pop_heap(vec,p,
@@ -358,6 +366,7 @@ calc_type board::search(cbool color,cshort height,calc_type alpha,calc_type beta
 				}
 
 				--p;
+				label_first:
 				brd = *this;
 				brd.flip(color,p->pos);
 
@@ -376,10 +385,12 @@ calc_type board::search(cbool color,cshort height,calc_type alpha,calc_type beta
 					ptr_val[p->pos] = result;
 				}
 				if(result >= beta){
-					trans_save(result);
+					trans_save(beta);
+					trans_save_pos;
 					return beta;
 				}
 				if(result > alpha){
+					trans_save_pos;
 					alpha = result;
 				}
 			}
@@ -438,10 +449,12 @@ calc_type board::search(cbool color,cshort height,calc_type alpha,calc_type beta
 						result = brd.template search<mthd>(color,height - 1,alpha,beta);
 					}
 					if(result <= alpha){
-						trans_save(result);
+						trans_save(alpha);
+						trans_save_pos;
 						return alpha;
 					}
 					if(result < beta){
+						trans_save_pos;
 						beta = result;
 					}
 				}
