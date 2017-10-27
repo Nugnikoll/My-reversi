@@ -14,7 +14,7 @@ bool board::flag_unicode = true;
 brd_type board::node_count;
 
 #ifdef USE_FLOAT
-	const calc_type board::mark_max = 100;
+	const calc_type board::mark_max = 2;
 #endif
 const char board::chr_print[board::chessman_num] = {'.','O','#','*'};
 calc_type board::table_param[stage_num][board::pos_num] = {{12,0.5,-6,-0.2},{10,0.5,-5,0.2},{3,1,0,0}};
@@ -79,46 +79,6 @@ void board::print(ostream& out)const{
 	}
 }
 
-vector<choice> board::get_choice(
-	cmethod mthd,cbool color,cshort height,ccalc_type gamma
-)const{
-
-    vector<choice> choices;
-	calc_type result;
-    choice temp;
-	calc_type alpha = _inf;
-
-	clear_search_info();
-
-//	if(mthd & mthd_kill){
-//		for(int i = this->sum();i != size2;++i){
-//			for(int j = 0;j != size2;++j){
-//				if(table_val[i][j] == 0){
-//					table_val[i][j] = table_val_init[j];
-//				}
-//			}
-//		}
-//	}
-
-	choices.reserve(30);
-
-    board brd = *this;
-	for(pos_type i = 0;i != size2;++i){
-		if(brd.flip(color,i)){
-			result = - brd.search(mthd,!color,height,_inf,-alpha,gamma);
-//			if(result - 5 > alpha){
-//				alpha = result - 5;
-//			}
-			temp.val = result;
-			temp.brd = brd;
-			temp.pos = i;
-			choices.push_back(temp);
-			brd = *this;
-		}
-	}
-    return choices;
-}
-
 #define USE_RANDOM
 
 #ifdef USE_RANDOM
@@ -161,20 +121,58 @@ choice board::select_choice(vector<choice> choices,const float& variation){
 	);
 }
 
-coordinate board::play(cmethod mthd,cbool color,short height){
+coordinate board::play(cmethod _mthd,cbool color,short height){
 
-	if(height < 0){
+	method mthd = _mthd;
+
+	if(mthd != mthd_rnd){
 		short total = this->sum();
-		if(total <= 7){
-			height = 9;
-		}else if(total <= 10){
-			height = 8;
-		}else if(total <= size2 - 22){
-			height = 7;
-		}else if(total <= size2 - 15){
-			height = 8;
-		}else{
-			height = 20;
+
+		if(height == -1){
+			if(total <= 7){
+				height = 9;
+			}else if(total <= 10){
+				height = 8;
+			}else if(total <= size2 - 22){
+				height = 7;
+			}else if(total <= size2 - 15){
+				height = 8;
+			}else{
+				height = 20;
+			}
+		}
+
+		if(height == -2){
+			if(total <= 7){
+				height = 9;
+			}else if(total <= 10){
+				height = 9;
+			}else if(total <= size2 - 24){
+				height = 8;
+			}else if(total <= size2 - 16){
+				height = 9;
+			}else{
+				height = 20;
+			}
+		}
+
+		if(height <= -3){
+			if(total <= 7){
+				height = 11;
+			}else if(total <= 10){
+				height = 10;
+			}else if(total <= size2 - 22){
+				height = 10;
+			}else if(total <= size2 - 16){
+				height = 10;
+			}else{
+				height = 20;
+			}
+		}
+
+		if(height >= size2 - total - 1){
+			mthd = method(mthd | mthd_end);
+			height = size2 - total - 1;	
 		}
 	}
 
@@ -182,13 +180,19 @@ coordinate board::play(cmethod mthd,cbool color,short height){
 	if(choices.empty()){
 		return coordinate(-1,-1);
 	}else{
-		float variation;
-		if(mthd & mthd_ptn){
-			variation = 0.15;
+		choice best;
+		if(mthd == mthd_rnd){
+			uniform_int_distribution<int> scatter(0,choices.size() - 1);
+			best = choices[scatter(engine)];
 		}else{
-			variation = 0.75;
+			float variation;
+			if(mthd & mthd_ptn){
+				variation = 0.2;
+			}else{
+				variation = 0.75;
+			}
+			best = select_choice(choices,variation);
 		}
-		choice best = select_choice(choices,variation);
 		flip(color,best.pos);
 		return coordinate(best.pos);
 	}

@@ -120,14 +120,10 @@ float score(cbool color){
 	return mygame.score(color);
 }
 
-//object eval_ptn(cbool color){
-//	return vec2obj(mygame.eval_ptn(color));
-//}
-
 void config(){
 	pattern::config();
 	mygame.config();
-	grp.load("python/ptn_opt.dat");
+	grp.load("data/pattern3.dat");
 } 
 bool flip(cbool color,cint x,cint y){
 	return mygame.flip(color,x,y);
@@ -171,6 +167,9 @@ void rotate_l(){
 }
 void rotate_r(){
 	return mygame.rotate_r();
+}
+void reverse(){
+	return mygame.reverse();
 }
 
 bool get_color(){
@@ -232,15 +231,6 @@ void grp_load(const string& filename){
 void grp_save(const string& filename){
 	return grp.save(filename);
 }
-//void grp_train(cint num, cint mthd, cint depth){
-//	for(int i = 0;i != num;++i){
-//		grp.train(method(mthd),depth);
-//	}
-//}
-
-//void use_ptn(cint num){
-//	set_ptn(grp.get(num));
-//}
 
 void process(const string& str){
 
@@ -268,6 +258,7 @@ void process(const string& str){
 		inter.def("reflect",::reflect);
 		inter.def("rotate_l",::rotate_l);
 		inter.def("rotate_r",::rotate_r);
+		inter.def("reverse",::reverse);
 		inter.def("auto_show",::auto_show);
 		inter.def("auto_save",::auto_save);
 		inter.def("bget",::bget);
@@ -285,18 +276,12 @@ void process(const string& str){
 		inter.def("count",::count);
 		inter.def("count_move",::count_move);
 		inter.def("score",::score);
-//		inter.def("eval_ptn",::eval_ptn);
 
 		inter.def("load",::load);
 
 		inter.def("grp_initial",::grp_initial);
 		inter.def("grp_load",::grp_load);
 		inter.def("grp_save",::grp_save);
-//		inter.def("grp_train",::grp_train);
-
-//		inter.def("set_ptn",set_ptn);
-//		inter.def("use_ptn",::use_ptn);
-//		inter.def("check_ptn",::check_ptn);
 
 		inter.def("load_book",::load_book);
 
@@ -317,7 +302,9 @@ void process(const string& str){
 			"set mthd_mtdf 0x10;"
 			"set mthd_ids 0x20;"
 			"set mthd_ptn 0x40;"
-			"set mthd_default [expr $mthd_kill | $mthd_ab];"
+			"set mthd_mpc 0x80;"
+			"set mthd_end 0x100;"
+			"set mthd_default [expr $mthd_ab | $mthd_kill | $mthd_pvs | $mthd_trans | $mthd_mtdf | $mthd_ptn];"
 
 			"set h_default -1;"
 

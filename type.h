@@ -5,7 +5,9 @@
 
 using namespace std;
 
-//#define USE_REF
+#ifndef __CYGWIN__
+	#define USE_REF
+#endif
 #define USE_FLOAT
 #define USE_RANDOM
 #if defined(__GNUC__) || defined(__clang__)
@@ -73,9 +75,11 @@ enum method{
 	mthd_trans = 0x8, // transition table
 	mthd_mtdf = 0x10, // memory-enhanced test driver with node n and value f
 	mthd_ids = 0x20, // iterative deepening search
-	mthd_ptn = 0x40,
+	mthd_ptn = 0x40, // pattern
+	mthd_mpc = 0x80, // multi-probability cut
+	mthd_end = 0x100, // end game solver
 
-	mthd_default = mthd_kill | mthd_ab
+	mthd_default = mthd_ab | mthd_kill | mthd_pvs | mthd_trans | mthd_mtdf | mthd_ptn
 };
 
 #ifdef USE_REF
@@ -114,13 +118,19 @@ enum sts_type{
 
 class board;
 struct choice;
+class pattern;
+class group;
 
 #ifdef USE_REF
 	typedef const board& cboard;
 	typedef const choice& cchoice;
+	typedef const pattern& cpattern;
+	typedef const group& cgroup;
 #else
 	typedef board cboard;
 	typedef choice cchoice;
+	typedef pattern cpattern;
+	typedef group cgroup;
 #endif //USE_REF
 
 #endif //TYPE_H

@@ -72,6 +72,7 @@ const long reversi_guiFrame::id_menu_mirror_v = wxNewId();
 const long reversi_guiFrame::id_menu_reflect = wxNewId();
 const long reversi_guiFrame::id_menu_rotate_r = wxNewId();
 const long reversi_guiFrame::id_menu_rotate_l = wxNewId();
+const long reversi_guiFrame::id_menu_reverse = wxNewId();
 const long reversi_guiFrame::id_menu_trans = wxNewId();
 const long reversi_guiFrame::id_menu_clear_log = wxNewId();
 const long reversi_guiFrame::id_menu_clear_term = wxNewId();
@@ -84,6 +85,7 @@ const long reversi_guiFrame::id_menu_alg_kill = wxNewId();
 const long reversi_guiFrame::id_menu_alg_mtdf = wxNewId();
 const long reversi_guiFrame::id_menu_alg_iter = wxNewId();
 const long reversi_guiFrame::id_menu_alg_ptn = wxNewId();
+const long reversi_guiFrame::id_menu_alg_mpc = wxNewId();
 const long reversi_guiFrame::id_menu_alg = wxNewId();
 const long reversi_guiFrame::id_menu_level1 = wxNewId();
 const long reversi_guiFrame::id_menu_level2 = wxNewId();
@@ -93,6 +95,8 @@ const long reversi_guiFrame::id_menu_level5 = wxNewId();
 const long reversi_guiFrame::id_menu_level6 = wxNewId();
 const long reversi_guiFrame::id_menu_level7 = wxNewId();
 const long reversi_guiFrame::id_menu_level8 = wxNewId();
+const long reversi_guiFrame::id_menu_level9 = wxNewId();
+const long reversi_guiFrame::id_menu_level10 = wxNewId();
 const long reversi_guiFrame::id_menu_level = wxNewId();
 const long reversi_guiFrame::id_menu_about = wxNewId();
 const long reversi_guiFrame::id_statusbar = wxNewId();
@@ -200,6 +204,8 @@ reversi_guiFrame::reversi_guiFrame(wxWindow* parent,wxWindowID id)
     menu_trans->Append(menu_rotate_r);
     menu_rotate_l = new wxMenuItem(menu_trans, id_menu_rotate_l, _("Rotate Coun&terclockwise\tAlt+T"), wxEmptyString, wxITEM_NORMAL);
     menu_trans->Append(menu_rotate_l);
+    menu_reverse = new wxMenuItem(menu_trans, id_menu_reverse, _("Reverse\tAlt+S"), wxEmptyString, wxITEM_NORMAL);
+    menu_trans->Append(menu_reverse);
     menu_edit->Append(id_menu_trans, _("&Transform"), menu_trans, wxEmptyString);
     menu_clear = new wxMenu();
     menu_clear_log = new wxMenuItem(menu_clear, id_menu_clear_log, _("&Log"), wxEmptyString, wxITEM_NORMAL);
@@ -212,42 +218,52 @@ reversi_guiFrame::reversi_guiFrame(wxWindow* parent,wxWindowID id)
     menu_alg = new wxMenu();
     menu_alg_rnd = new wxMenuItem(menu_alg, id_menu_alg_rnd, _("&Random"), wxEmptyString, wxITEM_CHECK);
     menu_alg->Append(menu_alg_rnd);
+    menu_alg->AppendSeparator();
     menu_alg_ab = new wxMenuItem(menu_alg, id_menu_alg_ab, _("&Alpha-Beta Pruning"), wxEmptyString, wxITEM_CHECK);
     menu_alg->Append(menu_alg_ab);
     menu_alg_ab->Check(true);
-    menu_alg_pvs = new wxMenuItem(menu_alg, id_menu_alg_pvs, _("&Principal Variation Search"), wxEmptyString, wxITEM_CHECK);
+    menu_alg_pvs = new wxMenuItem(menu_alg, id_menu_alg_pvs, _("Principal &Variation Search"), wxEmptyString, wxITEM_CHECK);
     menu_alg->Append(menu_alg_pvs);
+    menu_alg_pvs->Check(true);
     menu_alg_trans = new wxMenuItem(menu_alg, id_menu_alg_trans, _("&Transposition Table"), wxEmptyString, wxITEM_CHECK);
     menu_alg->Append(menu_alg_trans);
+    menu_alg_trans->Check(true);
     menu_alg_kill = new wxMenuItem(menu_alg, id_menu_alg_kill, _("&Killer Heuristic"), wxEmptyString, wxITEM_CHECK);
     menu_alg->Append(menu_alg_kill);
     menu_alg_kill->Check(true);
     menu_alg_mtdf = new wxMenuItem(menu_alg, id_menu_alg_mtdf, _("&Memory-Enhanced Test Driver"), wxEmptyString, wxITEM_CHECK);
     menu_alg->Append(menu_alg_mtdf);
+    menu_alg_mtdf->Check(true);
     menu_alg_iter = new wxMenuItem(menu_alg, id_menu_alg_iter, _("&Iterative Deepening Search"), wxEmptyString, wxITEM_CHECK);
     menu_alg->Append(menu_alg_iter);
-    menu_alg_iter->Enable(false);
-    MenuItem10 = new wxMenuItem(menu_alg, id_menu_alg_ptn, _("&Pattern"), wxEmptyString, wxITEM_CHECK);
-    menu_alg->Append(MenuItem10);
+    menu_alg_ptn = new wxMenuItem(menu_alg, id_menu_alg_ptn, _("&Pattern"), wxEmptyString, wxITEM_CHECK);
+    menu_alg->Append(menu_alg_ptn);
+    menu_alg_ptn->Check(true);
+    menu_alg_mpc = new wxMenuItem(menu_alg, id_menu_alg_mpc, _("Multi-Probability &Cut"), wxEmptyString, wxITEM_CHECK);
+    menu_alg->Append(menu_alg_mpc);
     menu_set->Append(id_menu_alg, _("&Algorithm"), menu_alg, wxEmptyString);
     menu_level = new wxMenu();
-    MenuItem1 = new wxMenuItem(menu_level, id_menu_level1, _("Level 1"), wxEmptyString, wxITEM_CHECK);
+    menu_level1 = new wxMenuItem(menu_level, id_menu_level1, _("Level 1"), wxEmptyString, wxITEM_CHECK);
+    menu_level->Append(menu_level1);
+    menu_level2 = new wxMenuItem(menu_level, id_menu_level2, _("Level 2"), wxEmptyString, wxITEM_CHECK);
+    menu_level->Append(menu_level2);
+    menu_level3 = new wxMenuItem(menu_level, id_menu_level3, _("Level 3"), wxEmptyString, wxITEM_CHECK);
+    menu_level->Append(menu_level3);
+    menu_level4 = new wxMenuItem(menu_level, id_menu_level4, _("Level 4"), wxEmptyString, wxITEM_CHECK);
+    menu_level->Append(menu_level4);
+    menu_level5 = new wxMenuItem(menu_level, id_menu_level5, _("Level 5"), wxEmptyString, wxITEM_CHECK);
+    menu_level->Append(menu_level5);
+    menu_level6 = new wxMenuItem(menu_level, id_menu_level6, _("Level 6"), wxEmptyString, wxITEM_CHECK);
+    menu_level->Append(menu_level6);
+    menu_level7 = new wxMenuItem(menu_level, id_menu_level7, _("Level 7"), wxEmptyString, wxITEM_CHECK);
+    menu_level->Append(menu_level7);
+    menu_level8 = new wxMenuItem(menu_level, id_menu_level8, _("Level 8"), wxEmptyString, wxITEM_CHECK);
+    menu_level->Append(menu_level8);
+    menu_level8->Check(true);
+    menu_level9 = new wxMenuItem(menu_level, id_menu_level9, _("Level 9"), wxEmptyString, wxITEM_CHECK);
+    menu_level->Append(menu_level9);
+    MenuItem1 = new wxMenuItem(menu_level, id_menu_level10, _("Level 10"), wxEmptyString, wxITEM_CHECK);
     menu_level->Append(MenuItem1);
-    MenuItem2 = new wxMenuItem(menu_level, id_menu_level2, _("Level 2"), wxEmptyString, wxITEM_CHECK);
-    menu_level->Append(MenuItem2);
-    MenuItem3 = new wxMenuItem(menu_level, id_menu_level3, _("Level 3"), wxEmptyString, wxITEM_CHECK);
-    menu_level->Append(MenuItem3);
-    MenuItem4 = new wxMenuItem(menu_level, id_menu_level4, _("Level 4"), wxEmptyString, wxITEM_CHECK);
-    menu_level->Append(MenuItem4);
-    MenuItem5 = new wxMenuItem(menu_level, id_menu_level5, _("Level 5"), wxEmptyString, wxITEM_CHECK);
-    menu_level->Append(MenuItem5);
-    MenuItem6 = new wxMenuItem(menu_level, id_menu_level6, _("Level 6"), wxEmptyString, wxITEM_CHECK);
-    menu_level->Append(MenuItem6);
-    MenuItem7 = new wxMenuItem(menu_level, id_menu_level7, _("Level 7"), wxEmptyString, wxITEM_CHECK);
-    menu_level->Append(MenuItem7);
-    MenuItem8 = new wxMenuItem(menu_level, id_menu_level8, _("Level 8"), wxEmptyString, wxITEM_CHECK);
-    menu_level->Append(MenuItem8);
-    MenuItem8->Check(true);
     menu_set->Append(id_menu_level, _("&Level"), menu_level, wxEmptyString);
     menubar->Append(menu_set, _("&Settings"));
     Menu2 = new wxMenu();
@@ -274,11 +290,12 @@ reversi_guiFrame::reversi_guiFrame(wxWindow* parent,wxWindowID id)
     Connect(id_menu_quit,wxEVT_COMMAND_MENU_SELECTED,(wxObjectEventFunction)&reversi_guiFrame::OnQuit);
     Connect(id_menu_undo,wxEVT_COMMAND_MENU_SELECTED,(wxObjectEventFunction)&reversi_guiFrame::on_undo);
     Connect(id_menu_redo,wxEVT_COMMAND_MENU_SELECTED,(wxObjectEventFunction)&reversi_guiFrame::on_redo);
-    Connect(id_menu_mirror_h,wxEVT_COMMAND_MENU_SELECTED,(wxObjectEventFunction)&reversi_guiFrame::on_mirror_h);
-    Connect(id_menu_mirror_v,wxEVT_COMMAND_MENU_SELECTED,(wxObjectEventFunction)&reversi_guiFrame::on_mirror_v);
-    Connect(id_menu_reflect,wxEVT_COMMAND_MENU_SELECTED,(wxObjectEventFunction)&reversi_guiFrame::on_reflect);
-    Connect(id_menu_rotate_r,wxEVT_COMMAND_MENU_SELECTED,(wxObjectEventFunction)&reversi_guiFrame::on_rotate_r);
-    Connect(id_menu_rotate_l,wxEVT_COMMAND_MENU_SELECTED,(wxObjectEventFunction)&reversi_guiFrame::on_rotate_l);
+    Connect(id_menu_mirror_h,wxEVT_COMMAND_MENU_SELECTED,(wxObjectEventFunction)&reversi_guiFrame::on_transform);
+    Connect(id_menu_mirror_v,wxEVT_COMMAND_MENU_SELECTED,(wxObjectEventFunction)&reversi_guiFrame::on_transform);
+    Connect(id_menu_reflect,wxEVT_COMMAND_MENU_SELECTED,(wxObjectEventFunction)&reversi_guiFrame::on_transform);
+    Connect(id_menu_rotate_r,wxEVT_COMMAND_MENU_SELECTED,(wxObjectEventFunction)&reversi_guiFrame::on_transform);
+    Connect(id_menu_rotate_l,wxEVT_COMMAND_MENU_SELECTED,(wxObjectEventFunction)&reversi_guiFrame::on_transform);
+    Connect(id_menu_reverse,wxEVT_COMMAND_MENU_SELECTED,(wxObjectEventFunction)&reversi_guiFrame::on_transform);
     Connect(id_menu_clear_log,wxEVT_COMMAND_MENU_SELECTED,(wxObjectEventFunction)&reversi_guiFrame::on_clear_log);
     Connect(id_menu_clear_term,wxEVT_COMMAND_MENU_SELECTED,(wxObjectEventFunction)&reversi_guiFrame::on_clear_term);
     Connect(id_menu_clear,wxEVT_COMMAND_MENU_SELECTED,(wxObjectEventFunction)&reversi_guiFrame::on_clear_all);
@@ -290,6 +307,7 @@ reversi_guiFrame::reversi_guiFrame(wxWindow* parent,wxWindowID id)
     Connect(id_menu_alg_mtdf,wxEVT_COMMAND_MENU_SELECTED,(wxObjectEventFunction)&reversi_guiFrame::on_menu_alg);
     Connect(id_menu_alg_iter,wxEVT_COMMAND_MENU_SELECTED,(wxObjectEventFunction)&reversi_guiFrame::on_menu_alg);
     Connect(id_menu_alg_ptn,wxEVT_COMMAND_MENU_SELECTED,(wxObjectEventFunction)&reversi_guiFrame::on_menu_alg);
+    Connect(id_menu_alg_mpc,wxEVT_COMMAND_MENU_SELECTED,(wxObjectEventFunction)&reversi_guiFrame::on_menu_alg);
     Connect(id_menu_level1,wxEVT_COMMAND_MENU_SELECTED,(wxObjectEventFunction)&reversi_guiFrame::on_menu_level);
     Connect(id_menu_level2,wxEVT_COMMAND_MENU_SELECTED,(wxObjectEventFunction)&reversi_guiFrame::on_menu_level);
     Connect(id_menu_level3,wxEVT_COMMAND_MENU_SELECTED,(wxObjectEventFunction)&reversi_guiFrame::on_menu_level);
@@ -298,6 +316,7 @@ reversi_guiFrame::reversi_guiFrame(wxWindow* parent,wxWindowID id)
     Connect(id_menu_level6,wxEVT_COMMAND_MENU_SELECTED,(wxObjectEventFunction)&reversi_guiFrame::on_menu_level);
     Connect(id_menu_level7,wxEVT_COMMAND_MENU_SELECTED,(wxObjectEventFunction)&reversi_guiFrame::on_menu_level);
     Connect(id_menu_level8,wxEVT_COMMAND_MENU_SELECTED,(wxObjectEventFunction)&reversi_guiFrame::on_menu_level);
+    Connect(id_menu_level9,wxEVT_COMMAND_MENU_SELECTED,(wxObjectEventFunction)&reversi_guiFrame::on_menu_level);
     Connect(id_menu_about,wxEVT_COMMAND_MENU_SELECTED,(wxObjectEventFunction)&reversi_guiFrame::OnAbout);
     //*)
 
@@ -376,24 +395,21 @@ void reversi_guiFrame::on_load(wxCommandEvent& event){
 	}
 }
 
-void reversi_guiFrame::on_rotate_r(wxCommandEvent& event){
-	process("rotate_r");
-}
-
-void reversi_guiFrame::on_rotate_l(wxCommandEvent& event){
-	process("rotate_l");
-}
-
-void reversi_guiFrame::on_mirror_h(wxCommandEvent& event){
-	process("mirror_h");
-}
-
-void reversi_guiFrame::on_mirror_v(wxCommandEvent& event){
-	process("mirror_v");
-}
-
-void reversi_guiFrame::on_reflect(wxCommandEvent& event){
-	process("reflect");
+void reversi_guiFrame::on_transform(wxCommandEvent& event){
+	long id = event.GetId();
+	if(id == id_menu_rotate_r){
+		process("rotate_r");
+	}else if(id == id_menu_rotate_l){
+		process("rotate_l");
+	}else if(id == id_menu_mirror_h){
+		process("mirror_h");
+	}else if(id == id_menu_mirror_v){
+		process("mirror_v");
+	}else if(id == id_menu_reflect){
+		process("reflect");
+	}else if(id == id_menu_reverse){
+		process("reverse");
+	}
 }
 
 void reversi_guiFrame::on_clear_log(wxCommandEvent& event){
@@ -416,7 +432,9 @@ void reversi_guiFrame::on_menu_alg(wxCommandEvent& event){
 	if(id == id_menu_alg_rnd){
 		if(menu_alg_rnd->IsChecked()){
 			for(wxMenuItem* ptr:menu_alg->GetMenuItems()){
-				ptr->Check(false);
+				if(ptr->IsCheckable()){
+					ptr->Check(false);
+				}
 			}
 			process("set mthd_default $mthd_rnd");
 		}
@@ -438,6 +456,8 @@ void reversi_guiFrame::on_menu_alg(wxCommandEvent& event){
 				process("set mthd_default [expr $mthd_default | $mthd_mtdf]");
 			}else if(id == id_menu_alg_ptn){
 				process("set mthd_default [expr $mthd_default | $mthd_ptn]");
+			}else if(id == id_menu_alg_mpc){
+				process("set mthd_default [expr $mthd_default | $mthd_mpc]");
 			}
 		}else{
 			bool flag = false;
@@ -458,10 +478,12 @@ void reversi_guiFrame::on_menu_alg(wxCommandEvent& event){
 				process("set mthd_default [expr $mthd_default & ~ $mthd_pvs]");
 			}else if(id == id_menu_alg_trans){
 				process("set mthd_default [expr $mthd_default & ~ $mthd_trans]");
-			}else if(id == id_menu_alg_trans){
+			}else if(id == id_menu_alg_mtdf){
 				process("set mthd_default [expr $mthd_default & ~ $mthd_mtdf]");
 			}else if(id == id_menu_alg_ptn){
 				process("set mthd_default [expr $mthd_default & ~ $mthd_ptn]");
+			}else if(id == id_menu_alg_mpc){
+				process("set mthd_default [expr $mthd_default & ~ $mthd_mpc]");
 			}
 		}
 	}
@@ -475,8 +497,10 @@ void reversi_guiFrame::on_menu_level(wxCommandEvent& event){
 	int pos;
 	wxMenuItem* item = menu_level->FindChildItem(event.GetId(),(size_t*)&pos);
 	item->Check(true);
-	if(pos >= 7){
+	if(pos == 7){
 		pos = -1;
+	}else if(pos >= 8){
+		pos = -2;
 	}
 	process((_("set h_default ") + wxString::FromDouble(pos)).ToStdString());
 }

@@ -6,7 +6,7 @@
 struct slot{
 	board brd;
 	calc_type alpha, beta;
-	short height;
+	short depth;
 	pos_type pos;
 };
 
@@ -40,26 +40,27 @@ public:
 		tnk.table = NULL;
 		return *this;
 	}
-
-	size_t mapping(const board& brd){
+	size_t mapping(cbool color,cboard brd){
 		return (
-			brd.brd_black * 3727042349078977
-			+ brd.brd_white * 9109418502615479
+			brd.bget(true) * 3727042349078977
+			+ brd.bget(false) * 9109418502615479
+			+ color
 		) % size;
 	}
 	void clear(){
 		for(int i = 0;i != size;++i){
 			slot& slt = table[i];
-			slt.height = 0;
+			slt.brd.assign(0,0);
+			slt.depth = 0;
 			slt.alpha = _inf;
 			slt.beta = inf;
 		}
 	}
-	void insert(const slot& slt){
-		table[mapping(slt.brd)] = slt;
+	void insert(cbool color,const slot& slt){
+		table[mapping(color,slt.brd)] = slt;
 	}
-	slot& find(const board& brd){
-		return table[mapping(brd)];
+	slot& find(cbool color,cboard brd){
+		return table[mapping(color,brd)];
 	}
 };
 

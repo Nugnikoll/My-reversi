@@ -73,10 +73,13 @@ public:
 	*/
 	board() = default;
 	board(cbrd_type _brd_black,cbrd_type _brd_white)
-		:brd_black(_brd_black),brd_white(_brd_white){}
+		:brd_white(_brd_white),brd_black(_brd_black){}
 
 	friend bool operator==(const board& b1,const board& b2){
 		return (b1.brd_black == b2.brd_black) && (b1.brd_white == b2.brd_white);
+	}
+	friend bool operator!=(const board& b1,const board& b2){
+		return (b1.brd_black != b2.brd_black) || (b1.brd_white != b2.brd_white);
 	}
 
 	static const pos_type chessman_num = 4;
@@ -125,42 +128,10 @@ public:
 	}
 
 	cbrd_type bget(cbool color)const{
-		#ifdef USE_ASM
-			const brd_type* ptr;
-			asm volatile(
-				"test %3, %3;"
-				"cmovnz %1, %0;"
-				"cmovz %2, %0"
-				:"=r"(ptr)
-				:"r"(&brd_black), "r"(&brd_white), "r"(color)
-			);
-			return *ptr;
-		#else
-			if(color){
-				return brd_black;
-			}else{
-				return brd_white;
-			}
-		#endif
+		return *((brd_type*)&brd_white + color);
 	}
 	brd_type& bget(cbool color){
-		#ifdef USE_ASM
-			brd_type* ptr;
-			asm volatile(
-				"test %3, %3;"
-				"cmovnz %1, %0;"
-				"cmovz %2, %0"
-				:"=r"(ptr)
-				:"r"(&brd_black), "r"(&brd_white), "r"(color)
-			);
-			return *ptr;
-		#else
-			if(color){
-				return brd_black;
-			}else{
-				return brd_white;
-			}
-		#endif
+		return *((brd_type*)&brd_white + color);
 	}
 
 	chessman get(cpos_type pos)const{
@@ -575,12 +546,23 @@ public:
 
 	static void clear_search_info();
 
-	bool flip(cbool color,cpos_type pos);
+	void flip(cbool color,cpos_type pos);
+
+	calc_type score_end(cbool color)const{
+		calc_type num_diff = count(color) - count(!color);
+		if(num_diff > 0){
+			return num_diff + mark_max;
+		}else if(num_diff < 0){
+			return num_diff - mark_max;
+		}else{
+			return 0;
+		}
+	}
 
 	calc_type score(cbool color)const{
 		brd_type brd_blue = bget(color);
 		brd_type brd_green = bget(!color);
-		brd_type brd_mix = brd_blue | brd_white;
+		brd_type brd_mix = brd_blue | brd_green;
 		brd_type brd_temp;
 
 		short stage;
@@ -613,12 +595,31 @@ public:
 	}
 
 	template<method mthd>
-	calc_type search(cbool color,cshort height,calc_type alpha,calc_type beta)const;
-
+	calc_type search(
+		cbool color,cshort height,
+		calc_type alpha = _inf,calc_type beta = inf,cbool flag_pass = false
+	)const;
 	calc_type search(
 		cmethod mthd,cbool color,cshort height,
 		ccalc_type alpha = _inf,ccalc_type beta = inf,ccalc_type gamma = 0
 	)const;
+	calc_type search_end_two(
+		cbool color,cpos_type pos1,cpos_type pos2,
+		calc_type alpha,calc_type beta,cbool flag_pass
+	)const;
+	calc_type search_end_three(
+		cbool color,cpos_type pos1,cpos_type pos2,cpos_type pos3,
+		calc_type alpha,calc_type beta,cbool flag_pass
+	)const;
+	calc_type search_end_four(
+		cbool color,cpos_type pos1,cpos_type pos2,cpos_type pos3,cpos_type pos4,
+		calc_type alpha,calc_type beta,cbool flag_pass
+	)const;
+	template<method mthd>
+	calc_type search_end_five(
+		cbool color,calc_type alpha,calc_type beta,cbool flag_pass
+	)const;
+
 
 	vector<choice> get_choice(cmethod mthd,cbool color,cshort height,ccalc_type gamma = 0)const;
 
@@ -669,9 +670,12 @@ public:
 		}
 	}
 
-	float score_ptn(cbool color)const;
+	float score_ptn(cbool color,const pattern& ptn)const;
+	void adjust_ptn(cbool color,pattern& ptn,cfloat value)const;
 
 protected:
+
+	brd_type brd_white,brd_black;
 
 	static void config_flip();
 	static void config_search();
@@ -679,7 +683,7 @@ protected:
 	#ifdef USE_FLOAT
 		static const calc_type mark_max;
 	#else
-		static const calc_type mark_max = 100;
+		static const calc_type mark_max = 2;
 	#endif
 };
 
@@ -695,10 +699,10 @@ struct std::hash<board> : public unary_function<board, size_t>{
 };
 
 struct choice{
-	float val;
 	board brd;
-	pos_type pos;
+	float val;
 	float rnd_val;
+	pos_type pos;
 };
 
 #endif // REVERSI_H

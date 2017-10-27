@@ -37,10 +37,18 @@ class reversi_app(wx.App):
 		self.text_term = xrc.XRCCTRL(self.frame, "id_text_term");
 		self.text_log = xrc.XRCCTRL(self.frame, "id_text_log");
 		self.menubar = self.frame.GetMenuBar();
+		self.menu_trans = self.menubar.FindItemById(xrc.XRCID("id_menu_trans")).GetSubMenu()
 		self.menu_alg = self.menubar.FindItemById(xrc.XRCID("id_menu_alg")).GetSubMenu();
 		self.menu_alg_rnd = self.menubar.FindItemById(xrc.XRCID("id_menu_alg_rnd"));
 		self.menu_level = self.menubar.FindItemById(xrc.XRCID("id_menu_level")).GetSubMenu();
 		self.statusbar = self.frame.GetStatusBar();
+
+		self.id_menu_trans_mirror_h = xrc.XRCID("id_menu_mirror_h");
+		self.id_menu_trans_mirror_v = xrc.XRCID("id_menu_mirror_v");
+		self.id_menu_trans_rotate_r = xrc.XRCID("id_menu_rotate_r");
+		self.id_menu_trans_rotate_l = xrc.XRCID("id_menu_rotate_l");
+		self.id_menu_trans_reflect = xrc.XRCID("id_menu_reflect");
+		self.id_menu_trans_reverse = xrc.XRCID("id_menu_reverse");
 
 		self.id_menu_alg_rnd = xrc.XRCID("id_menu_alg_rnd");
 		self.id_menu_alg_ab = xrc.XRCID("id_menu_alg_ab");
@@ -49,6 +57,7 @@ class reversi_app(wx.App):
 		self.id_menu_alg_trans = xrc.XRCID("id_menu_alg_trans");
 		self.id_menu_alg_mtdf = xrc.XRCID("id_menu_alg_mtdf");
 		self.id_menu_alg_ptn = xrc.XRCID("id_menu_alg_ptn");
+		self.id_menu_alg_mpc = xrc.XRCID("id_menu_alg_mpc");
 
 		self.panel_board.Bind(wx.EVT_PAINT,self.on_panel_board_paint);
 		self.panel_board.Bind(wx.EVT_LEFT_DOWN,self.on_panel_board_leftdown);
@@ -63,18 +72,17 @@ class reversi_app(wx.App):
 		self.Bind(wx.EVT_MENU,self.on_clear_log,id = xrc.XRCID("id_menu_clear_log"));
 		self.Bind(wx.EVT_MENU,self.on_clear_term,id = xrc.XRCID("id_menu_clear_term"));
 		self.Bind(wx.EVT_MENU,self.on_clear_all,id = xrc.XRCID("id_menu_clear"));
-		self.Bind(wx.EVT_MENU,self.on_mirror_h,id = xrc.XRCID("id_menu_mirror_h"));
-		self.Bind(wx.EVT_MENU,self.on_mirror_v,id = xrc.XRCID("id_menu_mirror_v"));
-		self.Bind(wx.EVT_MENU,self.on_reflect,id = xrc.XRCID("id_menu_reflect"));
-		self.Bind(wx.EVT_MENU,self.on_rotate_r,id = xrc.XRCID("id_menu_rotate_r"));
-		self.Bind(wx.EVT_MENU,self.on_rotate_l,id = xrc.XRCID("id_menu_rotate_l"));
-		self.Connect(-1,-1,evt_thrd_id,self.thrd_catch);
+
+		for item in self.menu_trans.GetMenuItems():
+			self.Bind(wx.EVT_MENU,self.on_menu_trans,item);
 
 		for item in self.menu_alg.GetMenuItems():
 			self.Bind(wx.EVT_MENU,self.on_menu_alg,item);
 
 		for item in self.menu_level.GetMenuItems():
 			self.Bind(wx.EVT_MENU,self.on_menu_level,item);
+
+		self.Connect(-1,-1,evt_thrd_id,self.thrd_catch);
 
 		# Connect(id_book_tree,wxEVT_COMMAND_TREE_ITEM_ACTIVATED,(wxObjectEventFunction)&reversi_guiFrame::on_tree_item_select);
 		
@@ -138,16 +146,20 @@ class reversi_app(wx.App):
 			# pos = 0;
 			# path = path.replace("\\","\\\\");
 			# self.process("load " + path);
-	def on_mirror_h(self, event):
-		self.process("mygame.mirror_h();");
-	def on_mirror_v(self, event):
-		self.process("mygame.mirror_v();");
-	def on_reflect(self, event):
-		self.process("mygame.reflect();");
-	def on_rotate_r(self, event):
-		self.process("mygame.rotate_r();");
-	def on_rotate_l(self, event):
-		self.process("mygame.rotate_l();");
+	def on_menu_trans(self, event):
+		id = event.GetId();
+		if id == self.id_menu_trans_mirror_h:
+			self.process("mygame.mirror_h();");
+		if id == self.id_menu_trans_mirror_v:
+			self.process("mygame.mirror_v();");
+		if id == self.id_menu_trans_reflect:
+			self.process("mygame.reflect();");
+		if id == self.id_menu_trans_rotate_r:
+			self.process("mygame.rotate_r();");
+		if id == self.id_menu_trans_rotate_l:
+			self.process("mygame.rotate_l();");
+		if id == self.id_menu_trans_reverse:
+			self.process("mygame.reverse();");
 	def on_clear_log(self, event):
 		self.process("self.text_log.Clear();");
 	def on_clear_term(self, event):
@@ -184,7 +196,8 @@ class reversi_app(wx.App):
 		if id == self.id_menu_alg_rnd:
 			if self.menu_alg_rnd.IsChecked():
 				for ptr in self.menu_alg.GetMenuItems():
-					ptr.Check(False);
+					if ptr.IsCheckable():
+						ptr.Check(False);
 				self.process("reversi.mthd_default = reversi.mthd_rnd")
 			self.menu_alg_rnd.Check(True);
 		else:
@@ -204,6 +217,8 @@ class reversi_app(wx.App):
 					self.process("reversi.mthd_default |= reversi.mthd_mtdf");
 				elif id == self.id_menu_alg_ptn:
 					self.process("reversi.mthd_default |= reversi.mthd_ptn");
+				elif id == self.id_menu_alg_mpc:
+					self.process("reversi.mthd_default |= reversi.mthd_mpc");
 			else:
 				flag = False;
 				for ptr in self.menu_alg.GetMenuItems():
@@ -224,6 +239,8 @@ class reversi_app(wx.App):
 					self.process("reversi.mthd_default &= ~reversi.mthd_mtdf");
 				elif id == self.id_menu_alg_ptn:
 					self.process("reversi.mthd_default &= ~reversi.mthd_ptn");
+				elif id == self.id_menu_alg_mpc:
+					self.process("reversi.mthd_default &= ~reversi.mthd_mpc");
 
 	def on_menu_level(self,event):
 		for item in self.menu_level.GetMenuItems():
@@ -232,8 +249,10 @@ class reversi_app(wx.App):
 		pos = 0;
 		(item,pos) = self.menu_level.FindChildItem(event.GetId());
 		item.Check(True);
-		if pos >= 7:
+		if pos == 7:
 			pos = -1;
+		elif pos >= 8:
+			pos = -2;
 
 		self.process("self.h_default = %d" % pos);
 
@@ -296,4 +315,6 @@ class reversi_app(wx.App):
 
 if __name__ == "__main__":
 	app = reversi_app(False);
+	def _print(s):
+		return app._print(s);
 	app.MainLoop();
