@@ -96,6 +96,7 @@ const long reversi_guiFrame::id_menu_level6 = wxNewId();
 const long reversi_guiFrame::id_menu_level7 = wxNewId();
 const long reversi_guiFrame::id_menu_level8 = wxNewId();
 const long reversi_guiFrame::id_menu_level9 = wxNewId();
+const long reversi_guiFrame::id_menu_level10 = wxNewId();
 const long reversi_guiFrame::id_menu_level = wxNewId();
 const long reversi_guiFrame::id_menu_about = wxNewId();
 const long reversi_guiFrame::id_statusbar = wxNewId();
@@ -235,7 +236,6 @@ reversi_guiFrame::reversi_guiFrame(wxWindow* parent,wxWindowID id)
     menu_alg_mtdf->Check(true);
     menu_alg_iter = new wxMenuItem(menu_alg, id_menu_alg_iter, _("&Iterative Deepening Search"), wxEmptyString, wxITEM_CHECK);
     menu_alg->Append(menu_alg_iter);
-    menu_alg_iter->Enable(false);
     menu_alg_ptn = new wxMenuItem(menu_alg, id_menu_alg_ptn, _("&Pattern"), wxEmptyString, wxITEM_CHECK);
     menu_alg->Append(menu_alg_ptn);
     menu_alg_ptn->Check(true);
@@ -262,6 +262,8 @@ reversi_guiFrame::reversi_guiFrame(wxWindow* parent,wxWindowID id)
     menu_level8->Check(true);
     menu_level9 = new wxMenuItem(menu_level, id_menu_level9, _("Level 9"), wxEmptyString, wxITEM_CHECK);
     menu_level->Append(menu_level9);
+    MenuItem1 = new wxMenuItem(menu_level, id_menu_level10, _("Level 10"), wxEmptyString, wxITEM_CHECK);
+    menu_level->Append(MenuItem1);
     menu_set->Append(id_menu_level, _("&Level"), menu_level, wxEmptyString);
     menubar->Append(menu_set, _("&Settings"));
     Menu2 = new wxMenu();

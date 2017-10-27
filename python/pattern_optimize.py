@@ -11,7 +11,7 @@ rv.group.config("ptn_opt.dat");
 ptn = rv.pattern();
 ptn.initial();
 
-size = 100000;
+size = 400000;
 alpha = 0.004 / size;
 
 time1 = time.clock();
@@ -49,7 +49,6 @@ for i in range(2000):
 	value = rv.evaluate(ptn,sample);
 	epsilon = target - value;
 	if i % 10 == 0:
-		print(value.modulus());
 		epsilon_2 = epsilon.modulus();
 		print("i: ",i," epsilon_2: ",epsilon_2);
 

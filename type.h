@@ -5,7 +5,9 @@
 
 using namespace std;
 
-//#define USE_REF
+#ifndef __CYGWIN__
+	#define USE_REF
+#endif
 #define USE_FLOAT
 #define USE_RANDOM
 #if defined(__GNUC__) || defined(__clang__)

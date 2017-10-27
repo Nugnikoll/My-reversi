@@ -102,6 +102,7 @@ class reversi_guiFrame: public wxFrame
         static const long id_menu_level7;
         static const long id_menu_level8;
         static const long id_menu_level9;
+        static const long id_menu_level10;
         static const long id_menu_level;
         static const long id_menu_about;
         static const long id_statusbar;
@@ -126,6 +127,7 @@ class reversi_guiFrame: public wxFrame
         wxNotebook* notebook;
         wxMenu* menu_alg;
         wxMenuItem* menu_alg_kill;
+        wxMenuItem* MenuItem1;
         wxTextCtrl* text_input;
         wxMenuItem* menu_undo;
         wxMenu* menu_new;

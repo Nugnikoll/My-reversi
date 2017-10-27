@@ -15,12 +15,12 @@
 
 const short depth_kill = 2;
 const short depth_pvs = 2;
-const short depth_hash = 3;
+const short depth_hash = 2;
 const short depth_mtdf = 4;
 const short depth_mpc = 3;
 
 calc_type table_val[board::size2 + 1][board::size2];
-trans_type table_trans[2];
+tank table_trans;
 
 const calc_type table_val_init[board::size2] = {
 	0.0010,0.0003,0.0007,0.0008,0.0008,0.0007,0.0003,0.0010,
@@ -164,8 +164,6 @@ void board::config_search(){}
 
 void board::clear_search_info(){
 	node_count = 0;
-	table_trans[0].clear();
-	table_trans[1].clear();
 }
 
 #ifdef __GNUC__
@@ -308,30 +306,35 @@ calc_type board::search(cbool color,cshort depth,calc_type alpha,calc_type beta,
 
 		bool flag_hash = (mthd & mthd_trans) && depth >= depth_hash;
 
+		slot* slt;
+		bool flag_hit;
 		calc_type alpha_save;
 
 		if(flag_hash){
-			trans_type::iterator trans_ptr = table_trans[color].find(*this);
-			if(trans_ptr != table_trans[color].end()){
-				auto& trans_interval = trans_ptr->second;
-				if(trans_interval.first >= beta){
-					return trans_interval.first;
+			slt = &table_trans.find(color,*this);
+			flag_hit = slt->brd == *this;
+			if(flag_hit && slt->depth == depth){
+				if(slt->alpha >= beta){
+					return slt->alpha ;
 				}
-				if(trans_interval.second <= alpha){
-					return trans_interval.second;
+				if(slt->beta <= alpha){
+					return slt->beta;
 				}
-				if(trans_interval.first > alpha){
-					alpha = trans_interval.first;
+				if(slt->alpha > alpha){
+					alpha = slt->alpha;
 				}
-				if(trans_interval.second < beta){
-					beta = trans_interval.second;
+				if(slt->beta < beta){
+					beta = slt->beta;
 				}
 				if(alpha == beta){
 					return alpha;
 				}
 				assert(alpha <= beta);
 			}else{
-				table_trans[color][*this] = interval(_inf,inf);
+				slt->brd = *this;
+				slt->depth = depth;
+				slt->alpha = _inf;
+				slt->beta = inf;
 			}
 			alpha_save = alpha;
 		}
@@ -382,6 +385,18 @@ calc_type board::search(cbool color,cshort depth,calc_type alpha,calc_type beta,
 				);
 			}
 
+			if(flag_hash && flag_hit){
+				for(brd_val* p = vec;p != ptr;++p){
+					if(p->pos == slt->pos){
+						swap(*p,*vec);
+					}
+				}
+			}
+
+			if(flag_hash){
+				slt->pos = vec->pos;
+			}
+
 			if(flag_kill){
 				make_heap(vec,ptr,
 					[](cbrd_val b1,cbrd_val b2) -> bool{
@@ -410,9 +425,13 @@ calc_type board::search(cbool color,cshort depth,calc_type alpha,calc_type beta,
 				}
 				if(temp >= beta){
 					if(flag_hash){
-						table_trans[color][*this].first = temp;
+						slt->alpha = temp;
+						slt->pos = p->pos;
 					}
 					return temp;
+				}
+				if(flag_hash && temp > alpha){
+					slt->pos = p->pos;
 				}
 				result = max(result,temp);
 				alpha = max(alpha,result);
@@ -420,9 +439,9 @@ calc_type board::search(cbool color,cshort depth,calc_type alpha,calc_type beta,
 
 			if(flag_hash){
 				if(result > alpha_save){
-					table_trans[color][*this] = {result,result};
+					slt->alpha = slt->beta = result;
 				}else{
-					table_trans[color][*this].second = result;
+					slt->beta = result;
 				}
 			}
 
@@ -436,7 +455,7 @@ calc_type board::search(cbool color,cshort depth,calc_type alpha,calc_type beta,
 
 			result = score_end(color);
 			if(flag_hash){
-				table_trans[color][*this] = {result,result};
+				slt->alpha = slt->beta = result;
 			}
 			return result;
 
