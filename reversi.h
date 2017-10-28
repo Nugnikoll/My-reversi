@@ -62,8 +62,6 @@ class board{
 	friend struct hash<board>;
 public:
 
-	brd_type brd_black,brd_white;
-
 	/** @fn board()
 	* @brief The default constructor of class board
 		This function do nothing at all.
