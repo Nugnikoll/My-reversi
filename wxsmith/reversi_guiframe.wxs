@@ -346,8 +346,9 @@
 						<handler function="on_menu_level" entry="EVT_MENU" />
 						<checkable>1</checkable>
 					</object>
-					<object class="wxMenuItem" name="id_menu_level10" variable="MenuItem1" member="yes">
+					<object class="wxMenuItem" name="id_menu_level10" variable="menu_level9" member="yes">
 						<label>Level 10</label>
+						<handler function="on_menu_level" entry="EVT_MENU" />
 						<checkable>1</checkable>
 					</object>
 				</object>

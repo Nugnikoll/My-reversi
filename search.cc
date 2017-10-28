@@ -840,7 +840,7 @@ vector<choice> board::get_choice(
 	calc_type result;
     choice temp;
 	calc_type alpha = _inf;
-	calc_type threshold = (mthd & mthd_ptn) ? 3 : 5;
+	calc_type threshold = (mthd & mthd_ptn) ? 1 : 5;
 	calc_type* ptr_val = table_val[this->sum()];
 
 	clear_search_info();

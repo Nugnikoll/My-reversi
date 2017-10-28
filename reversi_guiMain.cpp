@@ -317,6 +317,7 @@ reversi_guiFrame::reversi_guiFrame(wxWindow* parent,wxWindowID id)
     Connect(id_menu_level7,wxEVT_COMMAND_MENU_SELECTED,(wxObjectEventFunction)&reversi_guiFrame::on_menu_level);
     Connect(id_menu_level8,wxEVT_COMMAND_MENU_SELECTED,(wxObjectEventFunction)&reversi_guiFrame::on_menu_level);
     Connect(id_menu_level9,wxEVT_COMMAND_MENU_SELECTED,(wxObjectEventFunction)&reversi_guiFrame::on_menu_level);
+    Connect(id_menu_level10,wxEVT_COMMAND_MENU_SELECTED,(wxObjectEventFunction)&reversi_guiFrame::on_menu_level);
     Connect(id_menu_about,wxEVT_COMMAND_MENU_SELECTED,(wxObjectEventFunction)&reversi_guiFrame::OnAbout);
     //*)
 
@@ -454,6 +455,8 @@ void reversi_guiFrame::on_menu_alg(wxCommandEvent& event){
 				process("set mthd_default [expr $mthd_default | $mthd_trans]");
 			}else if(id == id_menu_alg_mtdf){
 				process("set mthd_default [expr $mthd_default | $mthd_mtdf]");
+			}else if(id == id_menu_alg_iter){
+				process("set mthd_default [expr $mthd_default | $mthd_iter]");
 			}else if(id == id_menu_alg_ptn){
 				process("set mthd_default [expr $mthd_default | $mthd_ptn]");
 			}else if(id == id_menu_alg_mpc){
@@ -480,6 +483,8 @@ void reversi_guiFrame::on_menu_alg(wxCommandEvent& event){
 				process("set mthd_default [expr $mthd_default & ~ $mthd_trans]");
 			}else if(id == id_menu_alg_mtdf){
 				process("set mthd_default [expr $mthd_default & ~ $mthd_mtdf]");
+			}else if(id == id_menu_alg_iter){
+				process("set mthd_default [expr $mthd_default & ~ $mthd_iter]");
 			}else if(id == id_menu_alg_ptn){
 				process("set mthd_default [expr $mthd_default & ~ $mthd_ptn]");
 			}else if(id == id_menu_alg_mpc){
@@ -499,8 +504,10 @@ void reversi_guiFrame::on_menu_level(wxCommandEvent& event){
 	item->Check(true);
 	if(pos == 7){
 		pos = -1;
-	}else if(pos >= 8){
+	}else if(pos == 8){
 		pos = -2;
+	}else if(pos >= 9){
+		pos = -3;
 	}
 	process((_("set h_default ") + wxString::FromDouble(pos)).ToStdString());
 }
